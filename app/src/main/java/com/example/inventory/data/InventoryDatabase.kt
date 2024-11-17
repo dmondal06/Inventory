@@ -1,28 +1,26 @@
 package com.example.inventory.data
 
+import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import android.content.Context
 
 @Database(entities = [Item::class], version = 1, exportSchema = false)
-abstract class ItemDatabase : RoomDatabase() {
+abstract class InventoryDatabase : RoomDatabase() {
 
     abstract fun itemDao(): ItemDao
 
     companion object {
         @Volatile
-        private var INSTANCE: ItemDatabase? = null
+        private var INSTANCE: InventoryDatabase? = null
 
-        fun getDatabase(context: Context): ItemDatabase {
+        fun getDatabase(context: Context): InventoryDatabase {
             return INSTANCE ?: synchronized(this) {
-                val instance = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
-                    ItemDatabase::class.java,
+                    InventoryDatabase::class.java,
                     "item_database"
-                ).fallbackToDestructiveMigration().build()
-                INSTANCE = instance
-                instance
+                ).fallbackToDestructiveMigration().build().also { INSTANCE = it }
             }
         }
     }
