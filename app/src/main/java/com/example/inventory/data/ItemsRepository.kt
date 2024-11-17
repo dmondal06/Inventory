@@ -19,4 +19,18 @@ package com.example.inventory.data
 /**
  * Repository that provides insert, update, delete, and retrieve of [Item] from a given data source.
  */
-interface ItemsRepository
+
+import com.example.inventory.data.Item
+
+interface ItemsRepository {
+
+    suspend fun insertItem(item: Item)
+
+    suspend fun updateItem(item: Item)
+
+    suspend fun deleteItem(item: Item)
+
+    suspend fun getItemById(id: Int): Item?
+
+    suspend fun getAllItems(): List<Item>
+}
