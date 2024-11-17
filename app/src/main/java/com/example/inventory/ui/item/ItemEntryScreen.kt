@@ -47,6 +47,7 @@ import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
 import java.util.Currency
 import java.util.Locale
+import androidx.compose.runtime.rememberCoroutineScope
 
 object ItemEntryDestination : NavigationDestination {
     override val route = "item_entry"
@@ -70,6 +71,7 @@ fun ItemEntryScreen(
             )
         }
     ) { innerPadding ->
+        val coroutineScope = rememberCoroutineScope()
         ItemEntryBody(
             itemUiState = viewModel.itemUiState,
             onItemValueChange = viewModel::updateUiState,
@@ -96,7 +98,7 @@ fun ItemEntryBody(
     Column(
         verticalArrangement = Arrangement.spacedBy(dimensionResource(id = R.dimen.padding_large)),
         modifier = modifier.padding(dimensionResource(id = R.dimen.padding_medium))
-        ) {
+    ) {
         ItemInputForm(
             itemDetails = itemUiState.itemDetails,
             onValueChange = onItemValueChange,

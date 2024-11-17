@@ -80,6 +80,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.5")
     implementation("androidx.room:room-common:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
+    implementation("androidx.compose.ui:ui-text:1.5.4")
 
     // Testing
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")
