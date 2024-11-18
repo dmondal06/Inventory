@@ -21,7 +21,8 @@ object AppViewModelProvider {
             ItemEntryViewModel(inventoryApplication().container.itemsRepository)
         }
         initializer {
-            ItemDetailsViewModel(this.createSavedStateHandle())
+            ItemDetailsViewModel(this.createSavedStateHandle(),
+                inventoryApplication().container.itemsRepository)
         }
         initializer {
             HomeViewModel(inventoryApplication().container.itemsRepository)
