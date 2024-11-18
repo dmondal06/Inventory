@@ -16,72 +16,66 @@
 
 package com.example.inventory.ui.item
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
-import com.example.inventory.data.ItemsRepository
 import com.example.inventory.data.Item
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import com.example.inventory.data.ItemsRepository
+import java.text.NumberFormat
 
 /**
- * Represents UI state for an Item.
+ * ViewModel to validate and insert items in the Room database.
+ */
+class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
+
+    /**
+     * Holds current item ui state
+     */
+    var itemUiState by mutableStateOf(ItemUiState())
+        private set
+
+    /**
+     * Updates the [itemUiState] with the value provided in the argument. This method also triggers
+     * a validation for input values.
+     */
+    fun updateUiState(itemDetails: ItemDetails) {
+        itemUiState =
+            ItemUiState(itemDetails = itemDetails, isEntryValid = validateInput(itemDetails))
+    }
+
+    suspend fun saveItem() {
+        if (validateInput()) {
+            itemsRepository.insertItem(itemUiState.itemDetails.toItem())
+        }
+    }
+
+    private fun validateInput(uiState: ItemDetails = itemUiState.itemDetails): Boolean {
+        return with(uiState) {
+            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
+        }
+    }
+}
+
+/**
+ * Represents Ui State for an Item.
  */
 data class ItemUiState(
     val itemDetails: ItemDetails = ItemDetails(),
     val isEntryValid: Boolean = false
 )
 
-/**
- * Represents details of an Item.
- */
 data class ItemDetails(
     val id: Int = 0,
     val name: String = "",
     val price: String = "",
-    val quantity: String = ""
+    val quantity: String = "",
 )
 
 /**
- * ViewModel for managing item entry UI state and interactions.
- */
-class ItemEntryViewModel(private val itemsRepository: ItemsRepository) : ViewModel() {
-
-    // Holds the UI state of the item entry screen
-    private val _itemUiState = MutableStateFlow(ItemUiState())
-    val itemUiState: StateFlow<ItemUiState> = _itemUiState
-
-    /**
-     * Updates the UI state based on user input.
-     */
-    fun updateUiState(itemDetails: ItemDetails) {
-        _itemUiState.value = ItemUiState(
-            itemDetails = itemDetails,
-            isEntryValid = validateInput(itemDetails)
-        )
-    }
-
-    /**
-     * Validates the user input. Returns true if all fields are filled.
-     */
-    private fun validateInput(uiState: ItemDetails = _itemUiState.value.itemDetails): Boolean {
-        return with(uiState) {
-            name.isNotBlank() && price.isNotBlank() && quantity.isNotBlank()
-        }
-    }
-
-    /**
-     * Converts the current UI state to an Item entity and saves it to the database.
-     */
-    suspend fun saveItem() {
-        if (validateInput()) {
-            itemsRepository.insertItem(_itemUiState.value.itemDetails.toItem())
-        }
-    }
-}
-
-/**
- * Extension function to convert [ItemDetails] to [Item].
+ * Extension function to convert [ItemDetails] to [Item]. If the value of [ItemDetails.price] is
+ * not a valid [Double], then the price will be set to 0.0. Similarly if the value of
+ * [ItemDetails.quantity] is not a valid [Int], then the quantity will be set to 0
  */
 fun ItemDetails.toItem(): Item = Item(
     id = id,
@@ -90,8 +84,12 @@ fun ItemDetails.toItem(): Item = Item(
     quantity = quantity.toIntOrNull() ?: 0
 )
 
+fun Item.formatedPrice(): String {
+    return NumberFormat.getCurrencyInstance().format(price)
+}
+
 /**
- * Extension function to convert [Item] to [ItemUiState].
+ * Extension function to convert [Item] to [ItemUiState]
  */
 fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState(
     itemDetails = this.toItemDetails(),
@@ -99,7 +97,7 @@ fun Item.toItemUiState(isEntryValid: Boolean = false): ItemUiState = ItemUiState
 )
 
 /**
- * Extension function to convert [Item] to [ItemDetails].
+ * Extension function to convert [Item] to [ItemDetails]
  */
 fun Item.toItemDetails(): ItemDetails = ItemDetails(
     id = id,
